@@ -1,0 +1,53 @@
+{
+	"name": "postal-code-scraper",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.ts",
+	"scripts": {
+		"prebuild": "shx rm -rf dist",
+		"build": "tsc",
+		"pretest": "npm run build && tsc -p tests",
+		"test": "mocha",
+		"prepare": "npm run build",
+		"pack": "npm pack",
+		"prepublishOnly": "npm test"
+	},
+	"type": "module",
+	"devDependencies": {
+		"@types/chai": "^5.0.1",
+		"@types/cheerio": "^0.22.35",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^22.13.9",
+		"@types/p-limit": "^2.1.0",
+		"@types/puppeteer": "^5.4.7",
+		"@types/sinon": "^17.0.4",
+		"chai": "^5.2.0",
+		"mocha": "^11.1.0",
+		"sinon": "^19.0.2",
+		"tsx": "^3.12.10",
+		"typescript": "^5.8.2"
+	},
+	"dependencies": {
+		"cheerio": "^1.0.0",
+		"p-limit": "^6.2.0",
+		"puppeteer": "^24.2.1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sasiasas/postal-code-scraper.git"
+	},
+	"keywords": [
+		"postal-codes",
+		"scraper",
+		"geodata",
+		"zip-codes"
+	],
+	"author": "Sallai Tamás-Levente",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/sasiasas/postal-code-scraper/issues"
+	},
+	"engines": {
+		"node": ">=18"
+	}
+}
