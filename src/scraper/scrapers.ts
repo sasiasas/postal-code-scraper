@@ -1,7 +1,7 @@
 import puppeteer, { Browser } from "puppeteer";
 import { ProcessingQueue } from "./queue";
 import { Fetcher } from "./fetchers";
-import { Region, ScraperConfig, PostalCodeLookup } from "../types";
+import { Region, ScraperConfig, PostalCodeLookup, RegionData } from "../types";
 import { createRegionIdGenerator, RegionIdGenerator } from "../utils/id-generator";
 import { writeFileSync, mkdirSync } from "fs";
 import path from "path";
@@ -26,43 +26,48 @@ export class PostalCodeScraper {
 
 	async scrapeCountry(countryName: string) {
 		await this.initBrowser();
-		const country = await this.getCountryDetails(countryName);
-		if (!country) {
-			this.config.logger?.warn(`Country not found: ${countryName}`);
-			return null;
+		try {
+			const country = await this.getCountryDetails(countryName);
+			if (!country) {
+				this.config.logger?.warn(`Country not found: ${countryName}`);
+				return null;
+			}
+
+			const data: RegionData = {};
+			await this.queue.process(country, data);
+
+			this.saveData(data, `${country.name}-postal-codes.json`, this.config.directory!);
+
+			const postalCodeLookup = this.generatePostalCodeLookup(data);
+			this.saveData(postalCodeLookup, `${country.name}-lookup.json`, this.config.directory!);
+		} finally {
+			await this.cleanup();
 		}
-
-		const data: Record<string, any> = {};
-		await this.queue.process(country, data);
-
-		this.saveData(data, `${country.name}-postal-codes.json`, this.config.directory!);
-
-		const postalCodeLookup = this.generatePostalCodeLookup(data);
-		this.saveData(postalCodeLookup, `${country.name}-lookup.json`, this.config.directory!);
-
-		await this.cleanup();
 	}
 
 	async scrapeCountries() {
 		await this.initBrowser();
-		const countries = await this.getCountriesDetails();
-		if (countries.length === 0) {
-			this.config.logger?.warn("No countries found.");
-			return null;
+		try {
+			const countries = await this.getCountriesDetails();
+			if (countries.length === 0) {
+				this.config.logger?.warn("No countries found.");
+				return null;
+			}
+
+			for (const country of countries) {
+				const key = this.config.usePrettyName ? country.prettyName : country.name;
+				const countryData: RegionData = {};
+				this.config.logger?.info(`Processing country: ${key}`);
+
+				await this.queue.process(country, countryData);
+				this.saveData(countryData, `${key}-postal-codes.json`, this.config.directory!);
+
+				const postalCodeLookup = this.generatePostalCodeLookup(countryData);
+				this.saveData(postalCodeLookup, `${key}-lookup.json`, this.config.directory!);
+			}
+		} finally {
+			await this.cleanup();
 		}
-
-		for (const country of countries) {
-			const key = this.config.usePrettyName ? country.prettyName : country.name;
-			const countryData: Record<string, any> = {};
-			this.config.logger?.info(`Processing country: ${key}`);
-
-			await this.queue.process(country, countryData);
-			this.saveData(countryData, `${key}-postal-codes.json`, this.config.directory!);
-
-			const postalCodeLookup = this.generatePostalCodeLookup(countryData);
-			this.saveData(postalCodeLookup, `${key}-lookup.json`, this.config.directory!);
-		}
-		await this.cleanup();
 	}
 
 	private async initBrowser() {
@@ -91,12 +96,12 @@ export class PostalCodeScraper {
 		}
 	}
 
-	private generatePostalCodeLookup(data: any): PostalCodeLookup {
+	private generatePostalCodeLookup(data: RegionData): PostalCodeLookup {
 		return this.buildLookup(data, createRegionIdGenerator());
 	}
 
 	private buildLookup(
-		regionObj: any,
+		regionObj: RegionData | string[],
 		idGenerator: RegionIdGenerator,
 		acc: string[] = [],
 		result: PostalCodeLookup = { postalCodeMap: {}, regions: {} }
@@ -130,6 +135,7 @@ export class PostalCodeScraper {
 			mkdirSync(directory, { recursive: true });
 			const filePath = path.join(directory, this.normalizeString(fileName));
 			writeFileSync(filePath, JSON.stringify(data, null, 2), { flag: "w" });
+			// await writeFile(filePath, JSON.stringify(data));
 			this.config.logger?.info(`Saved data to ${filePath}`);
 		} catch (error) {
 			this.config.logger?.error(`Error saving data to ${fileName}`, error);

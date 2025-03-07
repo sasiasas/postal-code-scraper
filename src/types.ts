@@ -19,7 +19,7 @@ export type ScraperConfig = {
 
 export type ProcessingQueueItem = {
 	region: Region;
-	currData: any;
+	currData: RegionData;
 };
 
 export type PostalCodeLookup = {
@@ -28,6 +28,10 @@ export type PostalCodeLookup = {
 };
 
 export interface PostalCodeData {
-	rawData: any;
+	rawData: RegionData;
 	postalCodeLookup: PostalCodeLookup;
+}
+
+export interface RegionData {
+	[key: string]: RegionData | string[];
 }

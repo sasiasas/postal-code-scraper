@@ -1,5 +1,5 @@
 import { load } from "cheerio";
-import { Region, ProcessingQueueItem, ScraperConfig } from "../types";
+import { Region, ProcessingQueueItem, ScraperConfig, RegionData } from "../types";
 import { Fetcher } from "./fetchers";
 import pLimit from "p-limit";
 import { Parser } from "./parsers";
@@ -13,7 +13,7 @@ export class ProcessingQueue {
 		this.limit = pLimit(config.concurrency || 15);
 	}
 
-	async process(startRegion: Region, data: any): Promise<void> {
+	async process(startRegion: Region, data: RegionData): Promise<void> {
 		this.queue.push({ region: startRegion, currData: data });
 
 		while (this.queue.length > 0) {
@@ -35,7 +35,6 @@ export class ProcessingQueue {
 			const html = await this.fetcher.fetchWithRetry(url);
 			const $ = load(html);
 
-			// Parse and add new regions to queue
 			const regions = Parser.parseRegions($, this.config);
 			regions.forEach((region) => {
 				const key = this.config.usePrettyName ? region.prettyName : region.name;
@@ -46,7 +45,6 @@ export class ProcessingQueue {
 				});
 			});
 
-			// Parse postal codes
 			const codes = Parser.parsePostalCodes($, this.config);
 			Object.assign(item.currData, codes);
 		} catch (error) {
