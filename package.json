@@ -1,8 +1,9 @@
 {
 	"name": "postal-code-scraper",
-	"version": "1.0.0",
-	"description": "",
-	"main": "index.ts",
+	"version": "1.0.1",
+	"description": "A tool for scraping country data, including regions and their postal codes",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"prebuild": "shx rm -rf dist",
 		"build": "tsc",
@@ -41,7 +42,12 @@
 		"postal-codes",
 		"scraper",
 		"geodata",
-		"zip-codes"
+		"zip-codes",
+		"region",
+		"country",
+		"county",
+		"location",
+		"address"
 	],
 	"author": "Sallai Tamás-Levente",
 	"license": "MIT",
