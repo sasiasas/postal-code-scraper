@@ -143,14 +143,14 @@ run();
 
 ## 🛠 Configuration Options
 
-| Option          | Type                          | Default                        | Description                                       |
-| --------------- | ----------------------------- | ------------------------------ | ------------------------------------------------- |
-| `directory`     | `string`                      | `src/data`                     | The directory to save data                        |
-| `concurrency`   | `number`                      | `15`                           | Maximum concurrent requests to process            |
-| `maxRetries`    | `number`                      | `5`                            | Number of retries for failed requests             |
-| `headless`      | `boolean`                     | `true`                         | Run Puppeteer in headless mode                    |
-| `usePrettyName` | `boolean`                     | `false`                        | Use country pretty names instead of default names |
-| `logger`        | `any implementation` | `null` | `Logger` - self implementation | Logger                                            |
+| Option          | Type                          | Default                          | Description                                                                                    |
+| --------------- | ----------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `directory`     | `string`                      | `src/data`                       | The directory to save data                                                                     |
+| `concurrency`   | `number`                      | `15`                             | Maximum concurrent requests to process                                                         |
+| `maxRetries`    | `number`                      | `5`                              | Number of retries for failed requests                                                          |
+| `headless`      | `boolean`                     | `true`                           | Run Puppeteer in headless mode                                                                 |
+| `usePrettyName` | `boolean`                     | `false`                          | Use country pretty names instead of default names                                              |
+| `logger`        | `object` `null`               | `Logger` (custom implementation) | Handles event logging, can be set to null to disable logging                                   |
 
 ## ❓ FAQs
 
