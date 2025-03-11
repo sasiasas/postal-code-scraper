@@ -13,7 +13,6 @@ describe("PostalCodeScraper", () => {
 	before(async function () {
 		this.timeout(20000);
 		config = {
-			baseUrl: "https://worldpostalcode.com",
 			headless: true,
 			concurrency: 10,
 			logger: console,
