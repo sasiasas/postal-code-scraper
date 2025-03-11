@@ -3,6 +3,7 @@ import { Region, ProcessingQueueItem, ScraperConfig, RegionData } from "../types
 import { Fetcher } from "./fetchers";
 import pLimit from "p-limit";
 import { Parser } from "./parsers";
+import { getBaseUrl } from "../utils/env-config";
 
 export class ProcessingQueue {
 	private queue: ProcessingQueueItem[] = [];
@@ -24,7 +25,7 @@ export class ProcessingQueue {
 	}
 
 	private async processItem(item: ProcessingQueueItem): Promise<void> {
-		const url = `${this.config.baseUrl}${item.region.path}`;
+		const url = `${getBaseUrl()}${item.region.path}`;
 
 		if (this.visitedUrls.has(url)) return;
 		this.visitedUrls.add(url);

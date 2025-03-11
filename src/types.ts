@@ -1,5 +1,3 @@
-import { Logger } from "./utils/logger";
-
 export type Region = {
 	path: string;
 	name: string;
@@ -8,13 +6,11 @@ export type Region = {
 
 export type ScraperConfig = {
 	usePrettyName?: boolean;
-	baseUrl?: string;
 	directory?: string;
 	concurrency?: number;
-	dataDir?: string;
 	maxRetries?: number;
 	headless?: boolean;
-	logger?: Logger;
+	logger?: any;
 };
 
 export type ProcessingQueueItem = {
@@ -22,14 +18,18 @@ export type ProcessingQueueItem = {
 	currData: RegionData;
 };
 
-export type PostalCodeLookup = {
-	postalCodeMap: Record<string, string>;
-	regions: Record<string, string[]>;
-};
+export interface LookupData {
+	postalCodeMap: {
+		[postalCode: string]: string;
+	};
+	regions: {
+		[code: string]: string[];
+	};
+}
 
 export interface PostalCodeData {
 	rawData: RegionData;
-	postalCodeLookup: PostalCodeLookup;
+	postalCodeLookup: LookupData;
 }
 
 export interface RegionData {

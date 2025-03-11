@@ -1,12 +1,15 @@
+import path from "path";
 import puppeteer, { Browser } from "puppeteer";
 import { ProcessingQueue } from "./queue";
 import { Fetcher } from "./fetchers";
-import { Region, ScraperConfig, PostalCodeLookup, RegionData } from "../types";
+import { Region, ScraperConfig, LookupData, RegionData } from "../types";
 import { createRegionIdGenerator, RegionIdGenerator } from "../utils/id-generator";
 import { writeFileSync, mkdirSync } from "fs";
-import path from "path";
 import { load } from "cheerio";
 import { Parser } from "./parsers";
+import { getBaseUrl } from "../utils/env-config";
+import { normalizeString } from "../utils/string-utils";
+import { Logger } from "../utils/logger";
 
 export class PostalCodeScraper {
 	private browser!: Browser;
@@ -15,11 +18,12 @@ export class PostalCodeScraper {
 
 	constructor(private config: ScraperConfig = {}) {
 		this.config = {
-			baseUrl: "https://worldpostalcode.com",
 			concurrency: 15,
 			maxRetries: 5,
 			headless: true,
 			directory: "src/data",
+			logger: Logger,
+			usePrettyName: false,
 			...config,
 		};
 	}
@@ -78,7 +82,7 @@ export class PostalCodeScraper {
 
 	private async getCountryDetails(name: string): Promise<Region | null> {
 		try {
-			const html = await this.fetcher.fetchWithRetry(this.config.baseUrl!);
+			const html = await this.fetcher.fetchWithRetry(getBaseUrl());
 			return Parser.parseCountryByName(load(html), this.config, name);
 		} catch (error) {
 			this.config.logger?.error(`Error fetching country details: ${name}`, error);
@@ -88,7 +92,7 @@ export class PostalCodeScraper {
 
 	private async getCountriesDetails(): Promise<Region[]> {
 		try {
-			const html = await this.fetcher.fetchWithRetry(this.config.baseUrl!);
+			const html = await this.fetcher.fetchWithRetry(getBaseUrl());
 			return Parser.parseCountries(load(html), this.config);
 		} catch (error) {
 			this.config.logger?.error("Error fetching countries details", error);
@@ -96,7 +100,7 @@ export class PostalCodeScraper {
 		}
 	}
 
-	private generatePostalCodeLookup(data: RegionData): PostalCodeLookup {
+	private generatePostalCodeLookup(data: RegionData): LookupData {
 		return this.buildLookup(data, createRegionIdGenerator());
 	}
 
@@ -104,8 +108,8 @@ export class PostalCodeScraper {
 		regionObj: RegionData | string[],
 		idGenerator: RegionIdGenerator,
 		acc: string[] = [],
-		result: PostalCodeLookup = { postalCodeMap: {}, regions: {} }
-	): PostalCodeLookup {
+		result: LookupData = { postalCodeMap: {}, regions: {} }
+	): LookupData {
 		if (Array.isArray(regionObj)) {
 			for (const item of regionObj) {
 				const id = idGenerator(acc);
@@ -120,29 +124,18 @@ export class PostalCodeScraper {
 		return result;
 	}
 
-	private normalizeString(str: string): string {
-		return str
-			.trim()
-			.toLowerCase()
-			.normalize("NFD")
-			.replace(/[\u0300-\u036f]/g, "")
-			.replace(/\s+/g, "-")
-			.replace(/[^a-z0-9.-]/g, "");
-	}
-
 	private saveData(data: any, fileName: string, directory: string = "src/data") {
 		try {
 			mkdirSync(directory, { recursive: true });
-			const filePath = path.join(directory, this.normalizeString(fileName));
+			const filePath = path.join(directory, normalizeString(fileName));
 			writeFileSync(filePath, JSON.stringify(data, null, 2), { flag: "w" });
-			// await writeFile(filePath, JSON.stringify(data));
 			this.config.logger?.info(`Saved data to ${filePath}`);
 		} catch (error) {
 			this.config.logger?.error(`Error saving data to ${fileName}`, error);
 		}
 	}
 
-	async cleanup() {
+	private async cleanup() {
 		await this.browser?.close();
 	}
 }
