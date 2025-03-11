@@ -4,7 +4,7 @@
 
 **Postal Code Scraper** is an automated web scraper designed to extract postal code data from countries worldwide. It efficiently fetches postal codes and organizes them into structured JSON files for easy use in applications.
 
-This library uses **Puppeteer** for web scraping and **Cheerio** for HTML parsing, ensuring accurate and efficient data extraction.
+This library uses **Puppeteer** for web scraping, **Cheerio** for HTML parsing, **p-limit** for controlling concurrency, ensuring accurate and efficient data extraction.
 
 ## 🚀 Features
 
