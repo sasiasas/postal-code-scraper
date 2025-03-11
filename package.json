@@ -1,6 +1,6 @@
 {
 	"name": "postal-code-scraper",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "A tool for scraping country data, including regions and their postal codes",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
