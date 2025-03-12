@@ -140,4 +140,4 @@ export class PostalCodeScraper {
 	}
 }
 
-export default new PostalCodeScraper();
+export default PostalCodeScraper;
